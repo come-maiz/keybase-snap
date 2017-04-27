@@ -1,0 +1,21 @@
+sudo: required
+language: bash
+
+services:
+  - docker
+
+script: git clone https://github.com/keybase/client
+
+after_success:
+  - mkdir client/packaging/linux/.snapcraft
+  - openssl aes-256-cbc -K $encrypted_ff1b90736e80_key -iv $encrypted_ff1b90736e80_iv
+    -in .snapcraft/travis_snapcraft.cfg -out client/packaging/linux/.snapcraft/snapcraft.cfg -d
+
+deploy:
+  'on':
+    branch: master
+  provider: script
+  script: docker run -v $(pwd)/client:/client -t snapcore/snapcraft sh -c
+    "apt update -qq && cd /client/packaging/linux && snapcraft &&
+    snapcraft push *.snap --release edge"
+  skip_cleanup: true
